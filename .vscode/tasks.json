@@ -1,0 +1,69 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "go-mod-tidy",
+            "type": "shell",
+            "command": "go mod tidy",
+            "group": "build",
+        },
+        {
+            "label": "go-build-windows-amd64",
+            "type": "shell",
+            "command": "GOOS=windows GOARCH=amd64 go build -o bin/app-windows-amd64.exe",
+            "group": "build",
+        },
+        {
+            "label": "go-build-windows-arm64",
+            "type": "shell",
+            "command": "GOOS=windows GOARCH=arm64 go build -o bin/app-windows-arm64.exe",
+            "group": "build",
+        },
+        {
+            "label": "go-build-linux-amd64",
+            "type": "shell",
+            "command": "GOOS=linux GOARCH=amd64 go build -o bin/app-linux-amd64",
+            "group": "build",
+        },
+        {
+            "label": "go-build-linux-arm64",
+            "type": "shell",
+            "command": "GOOS=linux GOARCH=arm64 go build -o bin/app-linux-arm64",
+            "group": "build",
+        },
+        {
+            "label": "go-build-darwin-amd64",
+            "type": "shell",
+            "command": "GOOS=darwin GOARCH=arm64 go build -o bin/app-darwin-amd64",
+            "group": "build",
+        },
+        {
+            "label": "go-build-darwin-arm64",
+            "type": "shell",
+            "command": "GOOS=darwin GOARCH=arm64 go build -o bin/app-darwin-arm64",
+            "group": "build",
+        },
+        {
+            "label": "shell-cleanup-bin-folder",
+            "type": "shell",
+            "command": "rm -rf bin",
+            "group": "none",
+        },
+        {
+            "label": "go-build-all-platforms",
+            "type": "shell",
+            "group": "build",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "go-build-windows-amd64",
+                "go-build-windows-arm64",
+                "go-build-linux-amd64",
+                "go-build-linux-arm64",
+                "go-build-darwin-amd64",
+                "go-build-darwin-arm64"
+            ],
+        }
+    ]
+}

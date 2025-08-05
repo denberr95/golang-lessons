@@ -1,0 +1,27 @@
+ARG ALPINE_VERSION=3.22
+ARG GO_VERSION=1.24.5
+
+FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION}
+
+ARG USERNAME=appuser
+ARG GROUNAME=appgroup
+ARG USER_UID=1000
+ARG USER_GID=${USER_UID}
+
+RUN apk add --no-cache git sudo openssh-client zsh curl openssl
+RUN addgroup -g ${USER_GID} ${GROUNAME}
+RUN adduser -u ${USER_UID} -G ${GROUNAME} -s /bin/zsh -D ${USERNAME}
+RUN echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME
+RUN chmod 0440 /etc/sudoers.d/$USERNAME
+
+RUN go install -v github.com/cweill/gotests/gotests@latest
+RUN go install -v github.com/fatih/gomodifytags@latest
+RUN go install -v github.com/josharian/impl@latest
+RUN go install -v github.com/go-delve/delve/cmd/dlv@latest
+RUN go install -v honnef.co/go/tools/cmd/staticcheck@latest
+RUN go install -v golang.org/x/tools/gopls@latest
+RUN go install -v golang.org/x/tools/cmd/goimports@latest
+
+RUN chown appuser:appgroup --recursive /go
+
+USER ${USERNAME}

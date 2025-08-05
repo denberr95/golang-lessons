@@ -1,0 +1,16 @@
+{
+    "name": "Golang Development",
+    "forwardPorts": [
+        9000
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "golang.Go"
+            ]
+        }
+    },
+    "build": {
+        "dockerfile": "Containerfile"
+    }
+}

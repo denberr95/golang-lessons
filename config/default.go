@@ -2,23 +2,23 @@ package config
 
 func ApplyDefaults(cfg *Config) {
 	applyWebServerDefaults(&cfg.GoApp.WebServer)
-	applyLoggingDefaults(&cfg.GoApp.Logging)
+	validateLoggingConfig(&cfg.GoApp.Logging)
 }
 
-func applyWebServerDefaults(ws *WebServerConfig) {
-	if ws.Host == "" {
-		ws.Host = "0.0.0.0"
+func applyWebServerDefaults(cfg *WebServerConfig) {
+	if cfg.Host == "" {
+		cfg.Host = "localhost"
 	}
-	if ws.Port == 0 {
-		ws.Port = 9000
+	if cfg.Port == 0 {
+		cfg.Port = 9000
 	}
 }
 
-func applyLoggingDefaults(log *LoggingConfig) {
-	if log.Format == "" {
-		log.Format = "text"
+func validateLoggingConfig(cfg *LoggingConfig) {
+	if !cfg.Format.IsValid() {
+		panic("unsupported log format")
 	}
-	if log.Level == "" {
-		log.Level = "info"
+	if !cfg.Level.IsValid() {
+		panic("Unsupported log level")
 	}
 }

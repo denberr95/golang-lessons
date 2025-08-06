@@ -1,41 +1,39 @@
 package config
 
 import (
-	"fmt"	
+	"flag"
+	"fmt"
+	"main/util"
 	"strings"
 
 	"github.com/spf13/viper"
 )
 
-type WebServerConfig struct {
-	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
+func ParseFlags() *ProgramFlags {
+	fileName := flag.String("config-file-name", "config.default", "Configuration file name")
+	fileType := flag.String("config-file-type", "yaml", "Type of the configuration file")
+	filePath := flag.String("config-file-path", ".", "Path to the configuration file directory")
+	flag.Parse()
+
+	return &ProgramFlags{
+		ConfigFileName: *fileName,
+		FileType:       *fileType,
+		FilePath:       *filePath,
+	}
 }
 
-type LoggingConfig struct {
-	Format string `mapstructure:"format"`
-	Level  string `mapstructure:"level"`
-}
-
-type Config struct {
-	GoApp struct {
-		WebServer WebServerConfig `mapstructure:"webserver"`
-		Logging   LoggingConfig   `mapstructure:"logging"`
-	} `mapstructure:"goapp"`
-}
-
-func LoadConfig() (*Config, error) {
+func LoadConfig(flags *ProgramFlags) (*Config, error) {
 	var cfg Config
-	
-	viper.SetConfigName("config.local")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+
+	viper.SetConfigName(flags.ConfigFileName)
+	viper.SetConfigType(flags.FileType)
+	viper.AddConfigPath(flags.FilePath)
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(util.Dot, util.Underscore))
 	viper.AutomaticEnv()
 
 	if err := viper.Unmarshal(&cfg); err != nil {

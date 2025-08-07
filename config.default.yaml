@@ -9,6 +9,7 @@ goapp:
     maxHeaderSizeMB: 1
     idleTimeout: 60
     gracefulShutdownTime: 5
+    enableAccessLog: true
   logging:
     format: 0
     level: 6

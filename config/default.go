@@ -84,40 +84,40 @@ func validateBasePath(cfg *WebServerConfig) {
 		basePath = u.String()
 	}
 	cfg.BasePath = basePath
-	log.Printf("defined base path: %s", cfg.BasePath)
+	log.Printf("defined http base path: %s", cfg.BasePath)
 }
 
 func validateReadTimeout(cfg *WebServerConfig) {
 	if cfg.ReadTimeout < 0 {
 		cfg.ReadTimeout = 10
 	}
-	log.Printf("defined read timeout: %d seconds", cfg.ReadTimeout)
+	log.Printf("defined http read timeout: %d seconds", cfg.ReadTimeout)
 }
 
 func validateWriteTimeout(cfg *WebServerConfig) {
 	if cfg.WriteTimeout < 0 {
 		cfg.WriteTimeout = 10
 	}
-	log.Printf("defined write timeout: %d seconds", cfg.WriteTimeout)
+	log.Printf("defined http write timeout: %d seconds", cfg.WriteTimeout)
 }
 
 func validateMaxHeaderSizeMB(cfg *WebServerConfig) {
 	if cfg.MaxHeaderSizeMB <= 0 {
 		cfg.MaxHeaderSizeMB = 1
 	}
-	log.Printf("defined max header size: %d MB", cfg.MaxHeaderSizeMB)
+	log.Printf("defined http max header size: %d MB", cfg.MaxHeaderSizeMB)
 }
 
 func validateIdleTimeout(cfg *WebServerConfig) {
 	if cfg.IdleTimeout < 0 {
 		cfg.IdleTimeout = 10
 	}
-	log.Printf("defined idle timeout: %d seconds", cfg.IdleTimeout)
+	log.Printf("defined http idle timeout: %d seconds", cfg.IdleTimeout)
 }
 
 func validateGracefulShutdownTime(cfg *WebServerConfig) {
 	if cfg.GracefulShutdownTime <= 0 {
 		cfg.GracefulShutdownTime = 10
 	}
-	log.Printf("defined graceful shutdown timeout: %d seconds", cfg.GracefulShutdownTime)
+	log.Printf("defined http graceful shutdown timeout: %d seconds", cfg.GracefulShutdownTime)
 }

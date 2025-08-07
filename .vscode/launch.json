@@ -18,7 +18,10 @@
             "buildFlags": [
                 "-ldflags",
                 "-X main.AppName=golang-lessons -X main.Version=1.0.0 -X main.Commit=dev -X main.BuildTime=manual"
-            ]
+            ],
+            "env": {
+                "GIN_MODE": "debug",
+            }
         }
     ]
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"main/config"
 	"main/logging"
 	"net/http"
@@ -15,14 +16,18 @@ import (
 )
 
 var router *gin.Engine
-var log *logrus.Logger
+var log *logrus.Logger = logging.GetLogger()
 
 func Init(cfg *config.WebServerConfig) {
-	router = gin.Default()
-	log = logging.GetLogger()
+	router = gin.New()
+	router.Use(gin.Recovery())
 
+	addAccessLogs(cfg)
 	addRoutes(cfg)
+	runWebServer(cfg)
+}
 
+func runWebServer(cfg *config.WebServerConfig) {
 	s := &http.Server{
 		Addr:           cfg.GetFullAddress(),
 		Handler:        router,
@@ -52,7 +57,26 @@ func Init(cfg *config.WebServerConfig) {
 }
 
 func addRoutes(cfg *config.WebServerConfig) {
-	registerUserRoutes(cfg.BasePath, router)
+	router.Group(cfg.BasePath)
+	registerUserRoutes(router)
+}
+
+func addAccessLogs(cfg *config.WebServerConfig) {
+	if cfg.EnableAccessLog {
+		router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+			return fmt.Sprintf("[%s] - [%s] - [%s] - [%s] - [%s] - [%d] - [%s] [%s] - [%s]\n",
+				param.TimeStamp.Format(time.RFC3339),
+				param.ClientIP,
+				param.Method,
+				param.Request.RequestURI,
+				param.Request.Proto,
+				param.StatusCode,
+				param.Latency,
+				param.Request.UserAgent(),
+				param.ErrorMessage,
+			)
+		}))
+	}
 }
 
 func GetRouter() *gin.Engine {

@@ -19,8 +19,8 @@ var users = []User{
 	},
 }
 
-func registerUserRoutes(basePath string, r *gin.Engine) {
-	group := r.Group(basePath + "v1/users")
+func registerUserRoutes(r *gin.Engine) {
+	group := r.Group("v1/users")
 	group.GET("", listUsers)
 	group.GET("/:id", getUser)
 }

@@ -15,6 +15,7 @@ type WebServerConfig struct {
 	MaxHeaderSizeMB      int    `mapstructure:"maxHeaderSizeMB"`
 	IdleTimeout          int    `mapstructure:"idleTimeout"`
 	GracefulShutdownTime int    `mapstructure:"gracefulShutdownTime"`
+	EnableAccessLog      bool   `mapstructure:"enableAccessLog"`
 }
 
 type LoggingConfig struct {

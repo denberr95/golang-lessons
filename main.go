@@ -14,9 +14,9 @@ var flags *config.ProgramFlags
 
 func main() {
 	setup()
-	log.Infof("Application information: %+v", FullVersion())
-	log.Debugf("Application started with configuration: %+v", &cfg)
-	run()
+	log.Infof("Application metadata -> %+v", FullVersion())
+	log.Debugf("Application started with configuration: %+v", cfg)
+	start()
 }
 
 func setup() {
@@ -28,6 +28,6 @@ func setup() {
 
 }
 
-func run() {
+func start() {
 	api.Init(&cfg.GoApp.WebServer)
 }

@@ -2,6 +2,7 @@ goapp:
   webserver:
     host: 0.0.0.0
     port: 9000
+    useHostname: false
   logging:
     format: 0
     level: 6
@@ -10,3 +11,5 @@ goapp:
     disableColors: false
     disableHTMLEscaping: false
     prettyPrint: false
+    fullTimestamp: true
+    forceQuote: true

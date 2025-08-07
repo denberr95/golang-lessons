@@ -1,10 +1,13 @@
 package main
 
 import (
-	"log"
 	"main/config"
 	"main/logging"
+
+	"github.com/sirupsen/logrus"
 )
+
+var log *logrus.Logger
 
 func main() {
 	flags := config.ParseFlags()
@@ -13,5 +16,7 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 	logging.Init(&cfg.GoApp.Logging)
-	logging.Logger().Infof("application started with configuration: %+v", *cfg)
+	log = logging.Logger()
+	log.Infof("starting application: %+v", FullVersion())
+	log.Debugf("application started with configuration: %+v", *cfg)
 }

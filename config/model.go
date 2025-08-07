@@ -1,8 +1,9 @@
 package config
 
 type WebServerConfig struct {
-	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	UseHostname bool   `mapstructure:"useHostname"`
 }
 
 type LoggingConfig struct {
@@ -13,6 +14,8 @@ type LoggingConfig struct {
 	DisableTimestamp    bool      `mapstructure:"disableTimestamp"`
 	DisableHTMLEscaping bool      `mapstructure:"disableHTMLEscaping"`
 	PrettyPrint         bool      `mapstructure:"prettyPrint"`
+	FullTimestamp       bool      `mapstructure:"fullTimestamp"`
+	ForceQuote          bool      `mapstructure:"forceQuote"`
 }
 
 type Config struct {

@@ -41,7 +41,7 @@ func Init(flags *ProgramFlags) {
 		log.Fatalf("unable to decode into struct: %v", err)
 	}
 
-	ApplyDefaults(&cfg)
+	applyConfiguration(&cfg)
 }
 
 func GetConfig() *Config {

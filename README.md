@@ -28,3 +28,4 @@
 - **util**: package per gestire `function`, `method`, `const` condivisi tra tutti i package dell'applicazione
 - **logging**: package per la configurazione del logging `logrus`
 - **config**: package per la configurazione dell'applicazione mediante `viper`
+- **api**: package per esporre le api tramite `go-gin`

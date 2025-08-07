@@ -1,9 +1,20 @@
 package config
 
+import (
+	"main/util"
+	"strconv"
+)
+
 type WebServerConfig struct {
-	Host        string `mapstructure:"host"`
-	Port        int    `mapstructure:"port"`
-	UseHostname bool   `mapstructure:"useHostname"`
+	Host                 string `mapstructure:"host"`
+	Port                 int    `mapstructure:"port"`
+	UseHostname          bool   `mapstructure:"useHostname"`
+	BasePath             string `mapstructure:"basePath"`
+	ReadTimeout          int    `mapstructure:"readTimeout"`
+	WriteTimeout         int    `mapstructure:"writeTimeout"`
+	MaxHeaderSizeMB      int    `mapstructure:"maxHeaderSizeMB"`
+	IdleTimeout          int    `mapstructure:"idleTimeout"`
+	GracefulShutdownTime int    `mapstructure:"gracefulShutdownTime"`
 }
 
 type LoggingConfig struct {
@@ -88,4 +99,9 @@ func (l LogLevel) IsValid() bool {
 	default:
 		return false
 	}
+}
+
+func (cfg WebServerConfig) GetFullAddress() string {
+	portStr := strconv.Itoa(cfg.Port)
+	return cfg.Host + util.Colon + portStr
 }

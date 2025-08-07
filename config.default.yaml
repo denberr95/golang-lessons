@@ -3,6 +3,12 @@ goapp:
     host: 0.0.0.0
     port: 9000
     useHostname: false
+    basePath: /
+    readTimeout: 60
+    writeTimeout: 60
+    maxHeaderSizeMB: 1
+    idleTimeout: 60
+    gracefulShutdownTime: 5
   logging:
     format: 0
     level: 6

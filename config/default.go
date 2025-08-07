@@ -3,17 +3,25 @@ package config
 import (
 	"log"
 	"main/util"
+	"net/url"
 	"os"
+	"strings"
 )
 
-func ApplyDefaults(cfg *Config) {
-	applyWebServerDefaults(&cfg.GoApp.WebServer)
+func applyConfiguration(cfg *Config) {
+	validateWebServerConfig(&cfg.GoApp.WebServer)
 	validateLoggingConfig(&cfg.GoApp.Logging)
 }
 
-func applyWebServerDefaults(cfg *WebServerConfig) {
+func validateWebServerConfig(cfg *WebServerConfig) {
 	validateHost(cfg)
 	validateHttpPort(cfg)
+	validateBasePath(cfg)
+	validateReadTimeout(cfg)
+	validateWriteTimeout(cfg)
+	validateMaxHeaderSizeMB(cfg)
+	validateIdleTimeout(cfg)
+	validateGracefulShutdownTime(cfg)
 }
 
 func validateLoggingConfig(cfg *LoggingConfig) {
@@ -58,4 +66,58 @@ func validateHost(cfg *WebServerConfig) {
 		cfg.Host = util.Localhost
 	}
 	log.Printf("defined http host: %s", cfg.Host)
+}
+
+func validateBasePath(cfg *WebServerConfig) {
+	basePath := strings.TrimSpace(cfg.BasePath)
+	if basePath == "" {
+		basePath = util.Slash
+	}
+	if !strings.HasPrefix(basePath, util.Slash) {
+		basePath = util.Slash + basePath
+	}
+	if basePath != util.Slash && strings.HasSuffix(basePath, util.Slash) {
+		basePath = strings.TrimSuffix(basePath, util.Slash)
+	}
+	u := &url.URL{Path: basePath}
+	if u.String() != basePath {
+		basePath = u.String()
+	}
+	cfg.BasePath = basePath
+	log.Printf("defined base path: %s", cfg.BasePath)
+}
+
+func validateReadTimeout(cfg *WebServerConfig) {
+	if cfg.ReadTimeout < 0 {
+		cfg.ReadTimeout = 10
+	}
+	log.Printf("defined read timeout: %d seconds", cfg.ReadTimeout)
+}
+
+func validateWriteTimeout(cfg *WebServerConfig) {
+	if cfg.WriteTimeout < 0 {
+		cfg.WriteTimeout = 10
+	}
+	log.Printf("defined write timeout: %d seconds", cfg.WriteTimeout)
+}
+
+func validateMaxHeaderSizeMB(cfg *WebServerConfig) {
+	if cfg.MaxHeaderSizeMB <= 0 {
+		cfg.MaxHeaderSizeMB = 1
+	}
+	log.Printf("defined max header size: %d MB", cfg.MaxHeaderSizeMB)
+}
+
+func validateIdleTimeout(cfg *WebServerConfig) {
+	if cfg.IdleTimeout < 0 {
+		cfg.IdleTimeout = 10
+	}
+	log.Printf("defined idle timeout: %d seconds", cfg.IdleTimeout)
+}
+
+func validateGracefulShutdownTime(cfg *WebServerConfig) {
+	if cfg.GracefulShutdownTime <= 0 {
+		cfg.GracefulShutdownTime = 10
+	}
+	log.Printf("defined graceful shutdown timeout: %d seconds", cfg.GracefulShutdownTime)
 }

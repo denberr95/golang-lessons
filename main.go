@@ -14,7 +14,7 @@ var flags *config.ProgramFlags
 
 func main() {
 	setup()
-	log.Infof("Application metadata -> %+v", FullVersion())
+	log.Infof("Application metadata %+v", FullVersion())
 	log.Debugf("Application started with configuration: %+v", cfg)
 	start()
 }

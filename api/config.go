@@ -23,6 +23,7 @@ func Init(cfg *config.WebServerConfig) {
 	router.Use(gin.Recovery())
 
 	addAccessLogs(cfg)
+	addDebugRouterLogFunc()
 	addRoutes(cfg)
 	runWebServer(cfg)
 }
@@ -39,7 +40,7 @@ func runWebServer(cfg *config.WebServerConfig) {
 
 	go func() {
 		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Error starting Web Server: %s\n", err)
+			log.Fatalf("Error starting Web Server: %s", err)
 		}
 	}()
 
@@ -61,10 +62,16 @@ func addRoutes(cfg *config.WebServerConfig) {
 	registerUserRoutes(router)
 }
 
+func addDebugRouterLogFunc() {
+	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
+		log.Infof("Exposed api httpMethod=%v, path=%v handler=%v nuHandlers=%v", httpMethod, absolutePath, handlerName, nuHandlers)
+	}
+}
+
 func addAccessLogs(cfg *config.WebServerConfig) {
 	if cfg.EnableAccessLog {
 		router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-			return fmt.Sprintf("[%s] - [%s] - [%s] - [%s] - [%s] - [%d] - [%s] [%s] - [%s]\n",
+			return fmt.Sprintf("[%s] - [%s] - [%s] - [%s] - [%s] - [%d] - [%s] [%s] - [%s]",
 				param.TimeStamp.Format(time.RFC3339),
 				param.ClientIP,
 				param.Method,

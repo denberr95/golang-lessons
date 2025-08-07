@@ -8,15 +8,19 @@ import (
 )
 
 var log *logrus.Logger
+var cfg *config.Config
+var flags *config.ProgramFlags
 
 func main() {
-	flags := config.ParseFlags()
-	cfg, err := config.LoadConfig(flags)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-	logging.Init(&cfg.GoApp.Logging)
-	log = logging.Logger()
+	initialize()
 	log.Infof("starting application: %+v", FullVersion())
-	log.Debugf("application started with configuration: %+v", *cfg)
+	log.Debugf("application started with configuration: %+v", &cfg)
+}
+
+func initialize() {
+	flags = config.ParseFlags()
+	config.Init(flags)
+	cfg = config.GetConfig()
+	logging.Init(&cfg.GoApp.Logging)
+	log = logging.GetLogger()
 }

@@ -2,12 +2,14 @@ package config
 
 import (
 	"flag"
-	"fmt"
+	"log"
 	"main/util"
 	"strings"
 
 	"github.com/spf13/viper"
 )
+
+var cfg Config
 
 func ParseFlags() *ProgramFlags {
 	fileName := flag.String("config-file-name", "config.default", "Configuration file name")
@@ -22,25 +24,26 @@ func ParseFlags() *ProgramFlags {
 	}
 }
 
-func LoadConfig(flags *ProgramFlags) (*Config, error) {
-	var cfg Config
+func Init(flags *ProgramFlags) {
 
 	viper.SetConfigName(flags.ConfigFileName)
 	viper.SetConfigType(flags.FileType)
 	viper.AddConfigPath(flags.FilePath)
 
 	if err := viper.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("error reading config file: %w", err)
+		log.Fatalf("error reading config file: %v", err)
 	}
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(util.Dot, util.Underscore))
 	viper.AutomaticEnv()
 
 	if err := viper.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("unable to decode into struct: %w", err)
+		log.Fatalf("unable to decode into struct: %v", err)
 	}
 
 	ApplyDefaults(&cfg)
+}
 
-	return &cfg, nil
+func GetConfig() *Config {
+	return &cfg
 }

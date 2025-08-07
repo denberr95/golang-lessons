@@ -14,6 +14,6 @@ func Init(cfg *config.LoggingConfig) {
 	configureLogLevel(cfg)
 }
 
-func Logger() *logrus.Logger {
+func GetLogger() *logrus.Logger {
 	return log
 }

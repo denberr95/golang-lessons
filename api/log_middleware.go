@@ -27,102 +27,107 @@ func (w *bodyWriter) Write(b []byte) (int, error) {
 
 func logMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var bodyBytes []byte
+		logBaseEntry := createBaseLogEntry(c)
+		logRequestEntry := logBaseEntry.WithField(util.LogrusFieldHttpDirection, util.HTTPRequest)
+		logResponseEntry := logBaseEntry.WithField(util.LogrusFieldHttpDirection, util.HTTPResponse)
 
-		logBaseEntry := log.WithFields(logrus.Fields{
-			util.LogrusFieldHttpMethod: c.Request.Method,
-			util.LogrusFieldHttpURL:    c.Request.URL.String(),
-		})
+		logHeaders(logRequestEntry, util.FormatHttpHeaders(c.Request.Header))
 
-		logRequestEntry := logBaseEntry.WithFields(logrus.Fields{
-			util.LogrusFieldHttpDirection: util.HTTPRequest,
-		})
-
-		logResponseEntry := logBaseEntry.WithFields(logrus.Fields{
-			util.LogrusFieldHttpDirection: util.HTTPResponse,
-		})
-
-		logRequestEntry.WithFields(logrus.Fields{
-			util.LogrusFieldHttpType: util.HTTPHeaders,
-		}).Debugf("%v", util.FormatHttpHeaders(c.Request.Header))
-
-		contentType := c.GetHeader(util.HeaderContentType)
-
-		if strings.HasPrefix(contentType, "multipart/form-data") {
-			if err := c.Request.ParseMultipartForm(cfg.GetMaxHeaderSizeMB()); err == nil && c.Request.MultipartForm != nil {
-
-				logRequestEntry.WithFields(logrus.Fields{
-					util.LogrusFieldHttpType: util.HTTPBody,
-				}).Debugf("%s", util.FormatMultipartForm(c.Request.MultipartForm))
-
-				logRequestEntry.WithFields(logrus.Fields{
-					util.LogrusFieldHttpType: util.HTTPAttachment,
-				}).Debugf("%s", util.FormatMultipartFiles(c.Request.MultipartForm))
-
-			} else {
-				logRequestEntry.WithFields(logrus.Fields{
-					util.LogrusFieldHttpType: util.HTTPBody,
-				}).Debugf("Errore durante la lettura del form: %v", err)
-			}
+		if isMultipartForm(c) {
+			logMultipartRequest(logRequestEntry, c)
 		} else {
-			if c.Request.Body != nil {
-				bodyBytes, _ = io.ReadAll(c.Request.Body)
-			}
-			c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-			logRequestEntry.WithFields(logrus.Fields{
-				util.LogrusFieldHttpType: util.HTTPBody,
-			}).Debugf("%s", string(bodyBytes))
-		}
-		bodyWriter := &bodyWriter{
-			ResponseWriter: c.Writer,
-			body:           bytes.NewBufferString(util.EmptyString),
-			isWritable:     true,
+			logStandardRequestBody(logRequestEntry, c)
 		}
 
-		c.Writer = bodyWriter
+		bw := wrapWriter(c)
 		c.Next()
+		logResponse(logResponseEntry, c, bw)
+	}
+}
 
-		if transferEncoding := c.Writer.Header().Get(util.HeaderTransferEncoding); strings.Contains(strings.ToLower(transferEncoding), "chunked") {
-			bodyWriter.isWritable = false
-		}
+func createBaseLogEntry(c *gin.Context) *logrus.Entry {
+	return log.WithFields(logrus.Fields{
+		util.LogrusFieldHttpMethod: c.Request.Method,
+		util.LogrusFieldHttpURL:    c.Request.URL.String(),
+	})
+}
 
-		logResponseEntry.WithFields(logrus.Fields{
-			util.LogrusFieldHttpType: util.HTTPHeaders,
-		}).Debugf("%s", util.FormatHttpHeaders(c.Writer.Header()))
+func logHeaders(entry *logrus.Entry, headers string) {
+	entry.WithField(util.LogrusFieldHttpType, util.HTTPHeaders).Debugf("%s", headers)
+}
 
-		if !bodyWriter.isWritable {
-			logResponseEntry.WithFields(logrus.Fields{
-				util.LogrusFieldHttpType:   util.HTTPBody,
-				util.LogrusFieldHttpStatus: c.Writer.Status(),
-			}).Debug("Contenuto streaming/chunked non loggato")
+func isMultipartForm(c *gin.Context) bool {
+	return strings.HasPrefix(c.GetHeader(util.HeaderContentType), "multipart/form-data")
+}
+
+func logMultipartRequest(entry *logrus.Entry, c *gin.Context) {
+	if err := c.Request.ParseMultipartForm(cfg.GetMaxHeaderSizeMB()); err == nil && c.Request.MultipartForm != nil {
+		entry.WithField(util.LogrusFieldHttpType, util.HTTPBody).Debugf("%s", util.FormatMultipartForm(c.Request.MultipartForm))
+		entry.WithField(util.LogrusFieldHttpType, util.HTTPAttachment).Debugf("%s", util.FormatMultipartFiles(c.Request.MultipartForm))
+	} else {
+		entry.WithField(util.LogrusFieldHttpType, util.HTTPBody).Debugf("Errore durante la lettura del form: %v", err)
+	}
+}
+
+func logStandardRequestBody(entry *logrus.Entry, c *gin.Context) {
+	if c.Request.Body != nil {
+		bodyBytes, _ := io.ReadAll(c.Request.Body)
+		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+		if len(bodyBytes) > 0 {
+			entry.WithField(util.LogrusFieldHttpType, util.HTTPBody).Debugf("%s", string(bodyBytes))
 		} else {
-			contentType := c.Writer.Header().Get(util.HeaderContentType)
-			if strings.HasPrefix(contentType, "multipart/") {
-				logResponseEntry.WithFields(logrus.Fields{
-					util.LogrusFieldHttpType:   util.HTTPAttachment,
-					util.LogrusFieldHttpStatus: c.Writer.Status(),
-				}).Debugf("%s", parseMultipartResponseFiles(contentType, bodyWriter.body.Bytes()))
-			} else {
-				logResponseEntry.WithFields(logrus.Fields{
-					util.LogrusFieldHttpType:   util.HTTPBody,
-					util.LogrusFieldHttpStatus: c.Writer.Status(),
-				}).Debugf("%s", bodyWriter.body.String())
-			}
+			entry.WithField(util.LogrusFieldHttpType, util.HTTPBody).Debug("Body vuoto")
 		}
+	}
+}
+
+func wrapWriter(c *gin.Context) *bodyWriter {
+	bw := &bodyWriter{
+		ResponseWriter: c.Writer,
+		body:           bytes.NewBufferString(util.EmptyString),
+		isWritable:     true,
+	}
+	c.Writer = bw
+	return bw
+}
+
+func logResponse(entry *logrus.Entry, c *gin.Context, bw *bodyWriter) {
+	if transferEncoding := c.Writer.Header().Get(util.HeaderTransferEncoding); strings.Contains(strings.ToLower(transferEncoding), "chunked") {
+		bw.isWritable = false
+	}
+
+	logHeaders(entry, util.FormatHttpHeaders(c.Writer.Header()))
+
+	if !bw.isWritable {
+		entry.WithFields(logrus.Fields{
+			util.LogrusFieldHttpType:   util.HTTPBody,
+			util.LogrusFieldHttpStatus: c.Writer.Status(),
+		}).Debug("Contenuto streaming/chunked non loggato")
+		return
+	}
+
+	contentType := c.Writer.Header().Get(util.HeaderContentType)
+	if strings.HasPrefix(contentType, "multipart/") {
+		entry.WithFields(logrus.Fields{
+			util.LogrusFieldHttpType:   util.HTTPAttachment,
+			util.LogrusFieldHttpStatus: c.Writer.Status(),
+		}).Debugf("%s", parseMultipartResponseFiles(contentType, bw.body.Bytes()))
+	} else {
+		entry.WithFields(logrus.Fields{
+			util.LogrusFieldHttpType:   util.HTTPBody,
+			util.LogrusFieldHttpStatus: c.Writer.Status(),
+		}).Debugf("%s", bw.body.String())
 	}
 }
 
 func parseMultipartResponseFiles(contentType string, body []byte) string {
 	var sb strings.Builder
-	boundary := ""
-	if _, params, err := mime.ParseMediaType(contentType); err == nil {
-		boundary = params["boundary"]
-	}
-	if boundary == "" {
+	_, params, err := mime.ParseMediaType(contentType)
+	if err != nil || params["boundary"] == "" {
 		return "No multipart boundary"
 	}
 
-	reader := multipart.NewReader(bytes.NewReader(body), boundary)
+	reader := multipart.NewReader(bytes.NewReader(body), params["boundary"])
 
 	for {
 		part, err := reader.NextPart()
@@ -137,10 +142,8 @@ func parseMultipartResponseFiles(contentType string, body []byte) string {
 		if err != nil {
 			continue
 		}
-		filename := params["filename"]
-		if filename != "" {
-			sb.WriteString(filename)
-			sb.WriteString(util.Semicolon)
+		if filename := params["filename"]; filename != "" {
+			sb.WriteString(filename + util.Semicolon)
 		}
 		part.Close()
 	}

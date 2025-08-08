@@ -7,16 +7,19 @@ goapp:
     readTimeout: 60
     writeTimeout: 60
     maxHeaderSizeMB: 1
+    maxMultipartMemoryMB: 10
     idleTimeout: 60
     gracefulShutdownTime: 5
     enableAccessLog: true
+    enableLogMiddleware: true
+    enablePrintExposedRouter: true
   logging:
     format: 0
     level: 6
     reportCaller: true
     disableTimestamp: false
     disableColors: false
-    disableHTMLEscaping: false
+    disableHTMLEscape: false
     prettyPrint: false
     fullTimestamp: true
     forceQuote: true

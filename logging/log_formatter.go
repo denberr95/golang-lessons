@@ -7,12 +7,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func configureFormatter(cfg *config.LoggingConfig) {
+func configureFormatter() {
 	switch cfg.Format {
 	case config.FormatJSON:
 		log.SetFormatter(&logrus.JSONFormatter{
 			DisableTimestamp:  cfg.DisableTimestamp,
-			DisableHTMLEscape: cfg.DisableHTMLEscaping,
+			DisableHTMLEscape: cfg.DisableHTMLEscape,
 			PrettyPrint:       cfg.PrettyPrint,
 			TimestampFormat:   time.RFC3339,
 		})

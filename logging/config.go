@@ -7,11 +7,12 @@ import (
 )
 
 var log = logrus.New()
+var cfg *config.LoggingConfig = &config.GetConfig().GoApp.Logging
 
-func Init(cfg *config.LoggingConfig) {
+func Init() {
 	log.ReportCaller = cfg.ReportCaller
-	configureFormatter(cfg)
-	configureLogLevel(cfg)
+	configureFormatter()
+	configureLogLevel()
 }
 
 func GetLogger() *logrus.Logger {

@@ -3,31 +3,35 @@ package config
 import (
 	"main/util"
 	"strconv"
+	"time"
 )
 
 type WebServerConfig struct {
-	Host                 string `mapstructure:"host"`
-	Port                 int    `mapstructure:"port"`
-	UseHostname          bool   `mapstructure:"useHostname"`
-	BasePath             string `mapstructure:"basePath"`
-	ReadTimeout          int    `mapstructure:"readTimeout"`
-	WriteTimeout         int    `mapstructure:"writeTimeout"`
-	MaxHeaderSizeMB      int    `mapstructure:"maxHeaderSizeMB"`
-	IdleTimeout          int    `mapstructure:"idleTimeout"`
-	GracefulShutdownTime int    `mapstructure:"gracefulShutdownTime"`
-	EnableAccessLog      bool   `mapstructure:"enableAccessLog"`
+	Host                     string `mapstructure:"host"`
+	Port                     int    `mapstructure:"port"`
+	UseHostname              bool   `mapstructure:"useHostname"`
+	BasePath                 string `mapstructure:"basePath"`
+	ReadTimeout              int    `mapstructure:"readTimeout"`
+	WriteTimeout             int    `mapstructure:"writeTimeout"`
+	MaxHeaderSizeMB          int    `mapstructure:"maxHeaderSizeMB"`
+	MaxMultipartMemoryMB     int    `mapstructure:"maxMultipartMemoryMB"`
+	IdleTimeout              int    `mapstructure:"idleTimeout"`
+	GracefulShutdownTime     int    `mapstructure:"gracefulShutdownTime"`
+	EnableAccessLog          bool   `mapstructure:"enableAccessLog"`
+	EnableLogMiddleware      bool   `mapstructure:"enableLogMiddleware"`
+	EnablePrintExposedRouter bool   `mapstructure:"enablePrintExposedRouter"`
 }
 
 type LoggingConfig struct {
-	Format              LogFormat `mapstructure:"format"`
-	Level               LogLevel  `mapstructure:"level"`
-	ReportCaller        bool      `mapstructure:"reportCaller"`
-	DisableColors       bool      `mapstructure:"disableColors"`
-	DisableTimestamp    bool      `mapstructure:"disableTimestamp"`
-	DisableHTMLEscaping bool      `mapstructure:"disableHTMLEscaping"`
-	PrettyPrint         bool      `mapstructure:"prettyPrint"`
-	FullTimestamp       bool      `mapstructure:"fullTimestamp"`
-	ForceQuote          bool      `mapstructure:"forceQuote"`
+	Format            LogFormat `mapstructure:"format"`
+	Level             LogLevel  `mapstructure:"level"`
+	ReportCaller      bool      `mapstructure:"reportCaller"`
+	DisableColors     bool      `mapstructure:"disableColors"`
+	DisableTimestamp  bool      `mapstructure:"disableTimestamp"`
+	DisableHTMLEscape bool      `mapstructure:"disableHTMLEscape"`
+	PrettyPrint       bool      `mapstructure:"prettyPrint"`
+	FullTimestamp     bool      `mapstructure:"fullTimestamp"`
+	ForceQuote        bool      `mapstructure:"forceQuote"`
 }
 
 type Config struct {
@@ -105,4 +109,24 @@ func (l LogLevel) IsValid() bool {
 func (cfg WebServerConfig) GetFullAddress() string {
 	portStr := strconv.Itoa(cfg.Port)
 	return cfg.Host + util.Colon + portStr
+}
+
+func (cfg WebServerConfig) GetMaxHeaderSizeMB() int64 {
+	return util.ShiftMB(cfg.MaxHeaderSizeMB)
+}
+
+func (cfg WebServerConfig) GetMaxHeaderBytes() int {
+	return util.ConvertMegabitesToBytes(cfg.MaxHeaderSizeMB)
+}
+
+func (cfg WebServerConfig) GetReadTimeout() time.Duration {
+	return time.Duration(cfg.ReadTimeout) * time.Second
+}
+
+func (cfg WebServerConfig) GetWriteTimeout() time.Duration {
+	return time.Duration(cfg.WriteTimeout) * time.Second
+}
+
+func (cfg WebServerConfig) GetIdleTimeout() time.Duration {
+	return time.Duration(cfg.IdleTimeout) * time.Second
 }

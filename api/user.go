@@ -14,7 +14,7 @@ var users = []User{
 	},
 	{
 		ID:      "2",
-		Name:    "Gianni",
+		Name:    "Luigi",
 		Surname: "Verdi",
 	},
 }
@@ -22,7 +22,12 @@ var users = []User{
 func registerUserRoutes(r *gin.Engine) {
 	group := r.Group("v1/users")
 	group.GET("", listUsers)
+	group.POST("", createUser)
 	group.GET("/:id", getUser)
+}
+
+func createUser(c *gin.Context) {
+	c.Status(http.StatusNoContent)
 }
 
 func listUsers(c *gin.Context) {

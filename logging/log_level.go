@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func configureLogLevel(cfg *config.LoggingConfig) {
+func configureLogLevel() {
 	switch cfg.Level {
 	case config.PANIC:
 		log.SetLevel(logrus.PanicLevel)

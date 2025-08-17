@@ -7,7 +7,7 @@ import (
 )
 
 func configureLogLevel() {
-	switch cfg.Base.Level {
+	switch loggingConfig.Base.Level {
 	case config.PANIC:
 		log.SetLevel(logrus.PanicLevel)
 	case config.FATAL:

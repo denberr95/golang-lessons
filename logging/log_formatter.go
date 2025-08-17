@@ -7,21 +7,21 @@ import (
 )
 
 func configureFormatter() {
-	if cfg.Text != nil {
+	if loggingConfig.Text != nil {
 		log.SetFormatter(&logrus.TextFormatter{
-			DisableColors:   cfg.Text.DisableColors,
-			FullTimestamp:   cfg.Text.FullTimestamp,
-			ForceQuote:      cfg.Text.ForceQuote,
+			DisableColors:   loggingConfig.Text.DisableColors,
+			FullTimestamp:   loggingConfig.Text.FullTimestamp,
+			ForceQuote:      loggingConfig.Text.ForceQuote,
 			TimestampFormat: time.RFC3339,
 		})
 		return
 	}
 
-	if cfg.JSON != nil {
+	if loggingConfig.JSON != nil {
 		log.SetFormatter(&logrus.JSONFormatter{
-			DisableTimestamp:  cfg.JSON.DisableTimestamp,
-			DisableHTMLEscape: cfg.JSON.DisableHTMLEscape,
-			PrettyPrint:       cfg.JSON.PrettyPrint,
+			DisableTimestamp:  loggingConfig.JSON.DisableTimestamp,
+			DisableHTMLEscape: loggingConfig.JSON.DisableHTMLEscape,
+			PrettyPrint:       loggingConfig.JSON.PrettyPrint,
 			TimestampFormat:   time.RFC3339,
 		})
 		return

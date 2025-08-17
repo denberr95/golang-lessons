@@ -17,7 +17,7 @@ import (
 
 var router *gin.Engine
 var log *logrus.Logger = logging.GetLogger()
-var cfg *config.WebServerConfig = &config.GetConfig().GoApp.WebServer
+var webServerConfig *config.WebServerConfig = &config.GetConfig().GoApp.WebServer
 
 func GetRouter() *gin.Engine {
 	return router
@@ -25,7 +25,7 @@ func GetRouter() *gin.Engine {
 
 func Run() {
 	router = gin.New()
-	router.MaxMultipartMemory = cfg.HTTP.GetMaxHeaderSizeMB()
+	router.MaxMultipartMemory = webServerConfig.HTTP.GetMaxHeaderSizeMB()
 	router.Use(gin.Recovery())
 
 	configureLogMiddleware()
@@ -36,13 +36,13 @@ func Run() {
 }
 
 func configureLogMiddleware() {
-	if cfg.Log.EnableLogMiddleware {
+	if webServerConfig.Log.EnableLogMiddleware {
 		router.Use(logMiddleware())
 	}
 }
 
 func configureAccessLog() {
-	if cfg.Log.EnableAccessLog {
+	if webServerConfig.Log.EnableAccessLog {
 		router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 			return fmt.Sprintf("[%s] - [%s] - [%s] - [%s] - [%s] - [%d] - [%s] [%s] - [%s]",
 				param.TimeStamp.Format(time.RFC3339),
@@ -60,7 +60,7 @@ func configureAccessLog() {
 }
 
 func configureDebugRouterLogFunc() {
-	if cfg.Log.EnablePrintExposedRouter {
+	if webServerConfig.Log.EnablePrintExposedRouter {
 		gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
 			log.Infof("Servizio esposto su httpMethod: %v, path: %v handler: %v nuHandlers: %v", httpMethod, absolutePath, handlerName, nuHandlers)
 		}
@@ -68,18 +68,18 @@ func configureDebugRouterLogFunc() {
 }
 
 func addRoutes() {
-	router.Group(cfg.Base.BasePath)
+	router.Group(webServerConfig.Base.BasePath)
 	registerUserRoutes(router)
 }
 
 func runWebServer() {
 	s := &http.Server{
 		Handler:        router,
-		Addr:           cfg.Base.GetFullAddress(),
-		ReadTimeout:    cfg.HTTP.ReadTimeout,
-		WriteTimeout:   cfg.HTTP.WriteTimeout,
-		MaxHeaderBytes: cfg.HTTP.GetMaxHeaderBytes(),
-		IdleTimeout:    cfg.HTTP.IdleTimeout,
+		Addr:           webServerConfig.Base.GetFullAddress(),
+		ReadTimeout:    webServerConfig.HTTP.ReadTimeout,
+		WriteTimeout:   webServerConfig.HTTP.WriteTimeout,
+		MaxHeaderBytes: webServerConfig.HTTP.GetMaxHeaderBytes(),
+		IdleTimeout:    webServerConfig.HTTP.IdleTimeout,
 	}
 
 	go func() {
@@ -93,7 +93,7 @@ func runWebServer() {
 	<-quit
 	log.Println("Stop Web Server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.HTTP.GracefulShutdownTime)
+	ctx, cancel := context.WithTimeout(context.Background(), webServerConfig.HTTP.GracefulShutdownTime)
 	defer cancel()
 	if err := s.Shutdown(ctx); err != nil {
 		log.Println("Errore Stop Web Server: ", err)

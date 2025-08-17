@@ -25,24 +25,24 @@ func GetRouter() *gin.Engine {
 
 func Run() {
 	router = gin.New()
-	router.MaxMultipartMemory = cfg.GetMaxHeaderSizeMB()
+	router.MaxMultipartMemory = cfg.HTTP.GetMaxHeaderSizeMB()
 	router.Use(gin.Recovery())
 
 	configureLogMiddleware()
-	configureAccessLogs()
+	configureAccessLog()
 	configureDebugRouterLogFunc()
 	addRoutes()
 	runWebServer()
 }
 
 func configureLogMiddleware() {
-	if cfg.EnableLogMiddleware {
+	if cfg.Log.EnableLogMiddleware {
 		router.Use(logMiddleware())
 	}
 }
 
-func configureAccessLogs() {
-	if cfg.EnableAccessLog {
+func configureAccessLog() {
+	if cfg.Log.EnableAccessLog {
 		router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 			return fmt.Sprintf("[%s] - [%s] - [%s] - [%s] - [%s] - [%d] - [%s] [%s] - [%s]",
 				param.TimeStamp.Format(time.RFC3339),
@@ -60,26 +60,26 @@ func configureAccessLogs() {
 }
 
 func configureDebugRouterLogFunc() {
-	if cfg.EnablePrintExposedRouter {
+	if cfg.Log.EnablePrintExposedRouter {
 		gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
-			log.Infof("Servizio esposto su httpMethod=%v, path=%v handler=%v nuHandlers=%v", httpMethod, absolutePath, handlerName, nuHandlers)
+			log.Infof("Servizio esposto su httpMethod: %v, path: %v handler: %v nuHandlers: %v", httpMethod, absolutePath, handlerName, nuHandlers)
 		}
 	}
 }
 
 func addRoutes() {
-	router.Group(cfg.BasePath)
+	router.Group(cfg.Base.BasePath)
 	registerUserRoutes(router)
 }
 
 func runWebServer() {
 	s := &http.Server{
 		Handler:        router,
-		Addr:           cfg.GetFullAddress(),
-		ReadTimeout:    cfg.GetReadTimeout(),
-		WriteTimeout:   cfg.GetWriteTimeout(),
-		MaxHeaderBytes: cfg.GetMaxHeaderBytes(),
-		IdleTimeout:    cfg.GetIdleTimeout(),
+		Addr:           cfg.Base.GetFullAddress(),
+		ReadTimeout:    cfg.HTTP.ReadTimeout,
+		WriteTimeout:   cfg.HTTP.WriteTimeout,
+		MaxHeaderBytes: cfg.HTTP.GetMaxHeaderBytes(),
+		IdleTimeout:    cfg.HTTP.IdleTimeout,
 	}
 
 	go func() {
@@ -93,7 +93,7 @@ func runWebServer() {
 	<-quit
 	log.Println("Stop Web Server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.GracefulShutdownTime)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.HTTP.GracefulShutdownTime)
 	defer cancel()
 	if err := s.Shutdown(ctx); err != nil {
 		log.Println("Errore Stop Web Server: ", err)

@@ -13,7 +13,8 @@
                 "DotJoshJohnson.xml",
                 "redhat.vscode-xml",
                 "adamhartford.vscode-base64",
-                "redhat.vscode-yaml"
+                "redhat.vscode-yaml",
+                "VisualStudioExptTeam.vscodeintellicode"
             ]
         }
     },

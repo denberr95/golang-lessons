@@ -9,10 +9,6 @@ var (
 	BuildTime = "unknown"
 )
 
-func FullVersion() string {
-	return fmt.Sprintf("appname: %s, version:%s, commit: %s, builtTime: %s)", AppName, Version, Commit, BuildTime)
-}
-
-func ShortVersion() string {
-	return fmt.Sprintf("%s %s", AppName, Version)
+func PrintVersion() string {
+	return fmt.Sprintf("AppName: %s, Version: %s, Commit: %s, BuildTime: %s", AppName, Version, Commit, BuildTime)
 }

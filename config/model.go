@@ -7,31 +7,54 @@ import (
 )
 
 type WebServerConfig struct {
-	Host                     string `mapstructure:"host"`
-	Port                     int    `mapstructure:"port"`
-	UseHostname              bool   `mapstructure:"useHostname"`
-	BasePath                 string `mapstructure:"basePath"`
-	ReadTimeout              int    `mapstructure:"readTimeout"`
-	WriteTimeout             int    `mapstructure:"writeTimeout"`
-	MaxHeaderSizeMB          int    `mapstructure:"maxHeaderSizeMB"`
-	MaxMultipartMemoryMB     int    `mapstructure:"maxMultipartMemoryMB"`
-	IdleTimeout              int    `mapstructure:"idleTimeout"`
-	GracefulShutdownTime     int    `mapstructure:"gracefulShutdownTime"`
-	EnableAccessLog          bool   `mapstructure:"enableAccessLog"`
-	EnableLogMiddleware      bool   `mapstructure:"enableLogMiddleware"`
-	EnablePrintExposedRouter bool   `mapstructure:"enablePrintExposedRouter"`
+	Base WebServerBaseConfig `mapstructure:"base"`
+	HTTP WebServerHTTPConfig `mapstructure:"http"`
+	Log  WebServerLogConfig  `mapstructure:"log"`
+}
+
+type WebServerBaseConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	UseHostname bool   `mapstructure:"useHostname"`
+	BasePath    string `mapstructure:"basePath"`
+}
+
+type WebServerHTTPConfig struct {
+	ReadTimeout          time.Duration `mapstructure:"readTimeout"`
+	WriteTimeout         time.Duration `mapstructure:"writeTimeout"`
+	MaxHeaderSizeMB      int           `mapstructure:"maxHeaderSizeMB"`
+	MaxMultipartMemoryMB int           `mapstructure:"maxMultipartMemoryMB"`
+	IdleTimeout          time.Duration `mapstructure:"idleTimeout"`
+	GracefulShutdownTime time.Duration `mapstructure:"gracefulShutdownTime"`
+}
+
+type WebServerLogConfig struct {
+	EnableAccessLog          bool `mapstructure:"enableAccessLog"`
+	EnableLogMiddleware      bool `mapstructure:"enableLogMiddleware"`
+	EnablePrintExposedRouter bool `mapstructure:"enablePrintExposedRouter"`
 }
 
 type LoggingConfig struct {
-	Format            LogFormat `mapstructure:"format"`
-	Level             LogLevel  `mapstructure:"level"`
-	ReportCaller      bool      `mapstructure:"reportCaller"`
-	DisableColors     bool      `mapstructure:"disableColors"`
-	DisableTimestamp  bool      `mapstructure:"disableTimestamp"`
-	DisableHTMLEscape bool      `mapstructure:"disableHTMLEscape"`
-	PrettyPrint       bool      `mapstructure:"prettyPrint"`
-	FullTimestamp     bool      `mapstructure:"fullTimestamp"`
-	ForceQuote        bool      `mapstructure:"forceQuote"`
+	Base *LoggingBaseConfig `mapstructure:"base"`
+	Text *LoggingTextConfig `mapstructure:"text"`
+	JSON *LoggingJSONConfig `mapstructure:"json"`
+}
+
+type LoggingBaseConfig struct {
+	Level        LogLevel `mapstructure:"level"`
+	ReportCaller bool     `mapstructure:"reportCaller"`
+}
+
+type LoggingTextConfig struct {
+	ForceQuote    bool `mapstructure:"forceQuote"`
+	DisableColors bool `mapstructure:"disableColors"`
+	FullTimestamp bool `mapstructure:"fullTimestamp"`
+}
+
+type LoggingJSONConfig struct {
+	DisableTimestamp  bool `mapstructure:"disableTimestamp"`
+	DisableHTMLEscape bool `mapstructure:"disableHTMLEscape"`
+	PrettyPrint       bool `mapstructure:"prettyPrint"`
 }
 
 type Config struct {
@@ -47,13 +70,7 @@ type ProgramFlags struct {
 	FilePath       string
 }
 
-type LogFormat int
 type LogLevel int
-
-var logFormat = map[LogFormat]string{
-	FormatText: "text",
-	FormatJSON: "json",
-}
 
 var logLevel = map[LogLevel]string{
 	PANIC: "panic",
@@ -75,26 +92,8 @@ const (
 	TRACE
 )
 
-const (
-	FormatText LogFormat = iota
-	FormatJSON
-)
-
-func (f LogFormat) String() string {
-	return logFormat[f]
-}
-
 func (l LogLevel) String() string {
 	return logLevel[l]
-}
-
-func (f LogFormat) IsValid() bool {
-	switch f {
-	case FormatText, FormatJSON:
-		return true
-	default:
-		return false
-	}
 }
 
 func (l LogLevel) IsValid() bool {
@@ -106,27 +105,24 @@ func (l LogLevel) IsValid() bool {
 	}
 }
 
-func (cfg WebServerConfig) GetFullAddress() string {
+func (cfg WebServerBaseConfig) GetFullAddress() string {
 	portStr := strconv.Itoa(cfg.Port)
 	return cfg.Host + util.Colon + portStr
 }
 
-func (cfg WebServerConfig) GetMaxHeaderSizeMB() int64 {
+func (cfg WebServerHTTPConfig) GetMaxHeaderSizeMB() int64 {
 	return util.ShiftMB(cfg.MaxHeaderSizeMB)
 }
 
-func (cfg WebServerConfig) GetMaxHeaderBytes() int {
+func (cfg WebServerHTTPConfig) GetMaxHeaderBytes() int {
 	return util.ConvertMegabitesToBytes(cfg.MaxHeaderSizeMB)
 }
 
-func (cfg WebServerConfig) GetReadTimeout() time.Duration {
-	return time.Duration(cfg.ReadTimeout) * time.Second
+func (cfg WebServerHTTPConfig) GetMaxMultipartMemoryMB() int64 {
+	return util.ShiftMB(cfg.MaxMultipartMemoryMB)
 }
 
-func (cfg WebServerConfig) GetWriteTimeout() time.Duration {
-	return time.Duration(cfg.WriteTimeout) * time.Second
-}
-
-func (cfg WebServerConfig) GetIdleTimeout() time.Duration {
-	return time.Duration(cfg.IdleTimeout) * time.Second
+func (cfg *Config) Print() string {
+	// TODO
+	return ""
 }

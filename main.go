@@ -13,8 +13,8 @@ var cfg *config.Config
 
 func main() {
 	setup()
-	log.Infof("Metadati applicazione %+v", FullVersion())
-	log.Debugf("Applicazione avviata con: %+v", cfg)
+	log.Infof("%s", PrintVersion())
+	log.Debugf("Applicazione avviata con: %s", cfg.Print())
 	start()
 }
 

@@ -10,7 +10,7 @@ var log = logrus.New()
 var cfg *config.LoggingConfig = &config.GetConfig().GoApp.Logging
 
 func Init() {
-	log.ReportCaller = cfg.ReportCaller
+	log.ReportCaller = cfg.Base.ReportCaller
 	configureFormatter()
 	configureLogLevel()
 }

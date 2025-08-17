@@ -1,27 +1,29 @@
 package logging
 
 import (
-	"main/config"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
 func configureFormatter() {
-	switch cfg.Format {
-	case config.FormatJSON:
+	if cfg.Text != nil {
+		log.SetFormatter(&logrus.TextFormatter{
+			DisableColors:   cfg.Text.DisableColors,
+			FullTimestamp:   cfg.Text.FullTimestamp,
+			ForceQuote:      cfg.Text.ForceQuote,
+			TimestampFormat: time.RFC3339,
+		})
+		return
+	}
+
+	if cfg.JSON != nil {
 		log.SetFormatter(&logrus.JSONFormatter{
-			DisableTimestamp:  cfg.DisableTimestamp,
-			DisableHTMLEscape: cfg.DisableHTMLEscape,
-			PrettyPrint:       cfg.PrettyPrint,
+			DisableTimestamp:  cfg.JSON.DisableTimestamp,
+			DisableHTMLEscape: cfg.JSON.DisableHTMLEscape,
+			PrettyPrint:       cfg.JSON.PrettyPrint,
 			TimestampFormat:   time.RFC3339,
 		})
-	case config.FormatText:
-		log.SetFormatter(&logrus.TextFormatter{
-			DisableColors:   cfg.DisableColors,
-			FullTimestamp:   cfg.FullTimestamp,
-			TimestampFormat: time.RFC3339,
-			ForceQuote:      cfg.ForceQuote,
-		})
+		return
 	}
 }

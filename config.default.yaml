@@ -1,25 +1,35 @@
 goapp:
   webserver:
-    host: 0.0.0.0
-    port: 9000
-    useHostname: false
-    basePath: /
-    readTimeout: 60
-    writeTimeout: 60
-    maxHeaderSizeMB: 1
-    maxMultipartMemoryMB: 10
-    idleTimeout: 60
-    gracefulShutdownTime: 5
-    enableAccessLog: true
-    enableLogMiddleware: true
-    enablePrintExposedRouter: true
+    base:
+      host: 0.0.0.0
+      port: 9000
+      useHostname: false
+      basePath: /
+    
+    http:
+      readTimeout: 60s
+      writeTimeout: 60s
+      maxHeaderSizeMB: 1
+      maxMultipartMemoryMB: 10
+      idleTimeout: 60s
+      gracefulShutdownTime: 5s
+
+    log:
+      enableAccessLog: true
+      enableLogMiddleware: true
+      enablePrintExposedRouter: true
   logging:
-    format: 0
-    level: 6
-    reportCaller: true
-    disableTimestamp: false
-    disableColors: false
-    disableHTMLEscape: false
-    prettyPrint: false
-    fullTimestamp: true
-    forceQuote: true
+    base:
+      level: 6
+      reportCaller: false
+    
+    text:
+     forceQuote: true
+     disableColors: false
+     fullTimestamp: true
+    
+    json:
+      disableTimestamp: false
+      disableHTMLEscape: false
+      prettyPrint: false
+    

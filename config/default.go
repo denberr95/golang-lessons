@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 )
 
 func applyConfiguration(cfg *Config) {
@@ -26,15 +27,19 @@ func validateWebServerConfig(cfg *WebServerConfig) {
 }
 
 func validateLoggingConfig(cfg *LoggingConfig) {
-	validateLogFormat(cfg.Format)
-	validateLogLevel(cfg.Level)
+	validateLogFormat(cfg)
+	validateLogLevel(cfg.Base.Level)
 }
 
-func validateLogFormat(format LogFormat) {
-	if !format.IsValid() {
-		log.Fatal("Log format configurato non supportato")
+func validateLogFormat(cfg *LoggingConfig) {
+	if cfg.Text == nil && cfg.JSON == nil {
+		cfg.Text = &LoggingTextConfig{
+			ForceQuote:    true,
+			DisableColors: false,
+			FullTimestamp: true,
+		}
+		log.Println("Formato Log definito: text")
 	}
-	log.Printf("Log format definito: %s", format.String())
 }
 
 func validateLogLevel(level LogLevel) {
@@ -45,32 +50,32 @@ func validateLogLevel(level LogLevel) {
 }
 
 func validateHttpPort(cfg *WebServerConfig) {
-	if cfg.Port <= 0 || cfg.Port > 65535 {
-		cfg.Port = 9000
+	if cfg.Base.Port <= 0 || cfg.Base.Port > 65535 {
+		cfg.Base.Port = 9000
 	}
-	log.Printf("Porta HTTP definita: %d", cfg.Port)
+	log.Printf("Porta HTTP definita: %d", cfg.Base.Port)
 }
 
 func validateHost(cfg *WebServerConfig) {
 	switch {
-	case cfg.UseHostname:
+	case cfg.Base.UseHostname:
 		hostname, err := os.Hostname()
 		if err != nil || hostname == "" {
 			log.Printf("Errore nel recupero dell'hostname di sistema, utilizzo 'localhost': %v", err)
-			cfg.Host = util.Localhost
+			cfg.Base.Host = util.Localhost
 		} else {
-			cfg.Host = hostname
+			cfg.Base.Host = hostname
 		}
-	case cfg.Host != "":
+	case cfg.Base.Host != "":
 		// Host is explicitly set, no action needed
 	default:
-		cfg.Host = util.Localhost
+		cfg.Base.Host = util.Localhost
 	}
-	log.Printf("HTTP Host definito: %s", cfg.Host)
+	log.Printf("HTTP Host definito: %s", cfg.Base.Host)
 }
 
 func validateBasePath(cfg *WebServerConfig) {
-	basePath := strings.TrimSpace(cfg.BasePath)
+	basePath := strings.TrimSpace(cfg.Base.BasePath)
 	if basePath == "" {
 		basePath = util.Slash
 	}
@@ -84,48 +89,48 @@ func validateBasePath(cfg *WebServerConfig) {
 	if u.String() != basePath {
 		basePath = u.String()
 	}
-	cfg.BasePath = basePath
-	log.Printf("HTTP base path definito: %s", cfg.BasePath)
+	cfg.Base.BasePath = basePath
+	log.Printf("HTTP base path definito: %s", cfg.Base.BasePath)
 }
 
 func validateReadTimeout(cfg *WebServerConfig) {
-	if cfg.ReadTimeout < 0 {
-		cfg.ReadTimeout = 10
+	if cfg.HTTP.ReadTimeout < 0 {
+		cfg.HTTP.ReadTimeout = 10 * time.Second
 	}
-	log.Printf("Definito HTTP read timeout: %d secondi", cfg.ReadTimeout)
+	log.Printf("Definito HTTP read timeout: %s", cfg.HTTP.ReadTimeout)
 }
 
 func validateWriteTimeout(cfg *WebServerConfig) {
-	if cfg.WriteTimeout < 0 {
-		cfg.WriteTimeout = 10
+	if cfg.HTTP.WriteTimeout < 0 {
+		cfg.HTTP.WriteTimeout = 10 * time.Second
 	}
-	log.Printf("Definito HTTP write timeout: %d secondi", cfg.WriteTimeout)
+	log.Printf("Definito HTTP write timeout: %s", cfg.HTTP.WriteTimeout)
 }
 
 func validateMaxHeaderSizeMB(cfg *WebServerConfig) {
-	if cfg.MaxHeaderSizeMB <= 0 {
-		cfg.MaxHeaderSizeMB = 1
+	if cfg.HTTP.MaxHeaderSizeMB <= 0 {
+		cfg.HTTP.MaxHeaderSizeMB = 1
 	}
-	log.Printf("Definita HTTP max header size: %d MB", cfg.MaxHeaderSizeMB)
+	log.Printf("Definita HTTP max header size: %d MB", cfg.HTTP.MaxHeaderSizeMB)
 }
 
 func validateMaxMultipartMemoryMB(cfg *WebServerConfig) {
-	if cfg.MaxMultipartMemoryMB <= 0 {
-		cfg.MaxHeaderSizeMB = 10
+	if cfg.HTTP.MaxMultipartMemoryMB <= 0 {
+		cfg.HTTP.MaxHeaderSizeMB = 10
 	}
-	log.Printf("Definita HTTP max multipart memory size: %d MB", cfg.MaxMultipartMemoryMB)
+	log.Printf("Definita HTTP max multipart memory size: %d MB", cfg.HTTP.MaxMultipartMemoryMB)
 }
 
 func validateIdleTimeout(cfg *WebServerConfig) {
-	if cfg.IdleTimeout < 0 {
-		cfg.IdleTimeout = 10
+	if cfg.HTTP.IdleTimeout < 0 {
+		cfg.HTTP.IdleTimeout = 10 * time.Second
 	}
-	log.Printf("Definito HTTP idle timeout: %d secondi", cfg.IdleTimeout)
+	log.Printf("Definito HTTP idle timeout: %s", cfg.HTTP.IdleTimeout)
 }
 
 func validateGracefulShutdownTime(cfg *WebServerConfig) {
-	if cfg.GracefulShutdownTime <= 0 {
-		cfg.GracefulShutdownTime = 10
+	if cfg.HTTP.GracefulShutdownTime <= 0 {
+		cfg.HTTP.GracefulShutdownTime = 10 * time.Second
 	}
-	log.Printf("Definito HTTP graceful shutdown timeout: %d second", cfg.GracefulShutdownTime)
+	log.Printf("Definito HTTP graceful shutdown timeout: %s", cfg.HTTP.GracefulShutdownTime)
 }

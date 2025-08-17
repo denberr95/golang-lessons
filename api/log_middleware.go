@@ -61,7 +61,7 @@ func isMultipartForm(c *gin.Context) bool {
 }
 
 func logMultipartRequest(entry *logrus.Entry, c *gin.Context) {
-	if err := c.Request.ParseMultipartForm(cfg.GetMaxHeaderSizeMB()); err == nil && c.Request.MultipartForm != nil {
+	if err := c.Request.ParseMultipartForm(cfg.HTTP.GetMaxMultipartMemoryMB()); err == nil && c.Request.MultipartForm != nil {
 		entry.WithField(util.LogrusFieldHttpType, util.HTTPBody).Debugf("%s", util.FormatMultipartForm(c.Request.MultipartForm))
 		entry.WithField(util.LogrusFieldHttpType, util.HTTPAttachment).Debugf("%s", util.FormatMultipartFiles(c.Request.MultipartForm))
 	} else {

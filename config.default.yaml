@@ -24,9 +24,9 @@ goapp:
       reportCaller: false
     
     text:
-     forceQuote: true
-     disableColors: false
-     fullTimestamp: true
+      forceQuote: true
+      disableColors: false
+      fullTimestamp: true
     
     json:
       disableTimestamp: false

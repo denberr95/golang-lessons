@@ -28,7 +28,7 @@ func validateWebServerConfig(cfg *WebServerConfig) {
 
 func validateLoggingConfig(cfg *LoggingConfig) {
 	validateLogFormat(cfg)
-	validateLogLevel(cfg.Base.Level)
+	validateLogLevel(&cfg.Base.Level)
 }
 
 func validateLogFormat(cfg *LoggingConfig) {
@@ -38,22 +38,22 @@ func validateLogFormat(cfg *LoggingConfig) {
 			DisableColors: false,
 			FullTimestamp: true,
 		}
-		log.Println("Formato Log definito: text")
+		log.Println("Definito Formato Log: 'text'")
 	}
 }
 
-func validateLogLevel(level LogLevel) {
+func validateLogLevel(level *LogLevel) {
 	if !level.IsValid() {
-		log.Fatal("Log level configurato non supportato")
+		*level = ERROR
 	}
-	log.Printf("Log level definito: %s", level.String())
+	log.Printf("Definito Log level: %s", level.String())
 }
 
 func validateHttpPort(cfg *WebServerConfig) {
 	if cfg.Base.Port <= 0 || cfg.Base.Port > 65535 {
 		cfg.Base.Port = 9000
 	}
-	log.Printf("Porta HTTP definita: %d", cfg.Base.Port)
+	log.Printf("Definita Porta HTTP: %d", cfg.Base.Port)
 }
 
 func validateHost(cfg *WebServerConfig) {
@@ -71,7 +71,7 @@ func validateHost(cfg *WebServerConfig) {
 	default:
 		cfg.Base.Host = util.Localhost
 	}
-	log.Printf("HTTP Host definito: %s", cfg.Base.Host)
+	log.Printf("Definito HTTP Host: %s", cfg.Base.Host)
 }
 
 func validateBasePath(cfg *WebServerConfig) {
@@ -90,7 +90,7 @@ func validateBasePath(cfg *WebServerConfig) {
 		basePath = u.String()
 	}
 	cfg.Base.BasePath = basePath
-	log.Printf("HTTP base path definito: %s", cfg.Base.BasePath)
+	log.Printf("Definito HTTP base path: %s", cfg.Base.BasePath)
 }
 
 func validateReadTimeout(cfg *WebServerConfig) {

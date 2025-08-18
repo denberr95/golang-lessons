@@ -21,7 +21,8 @@
             ],
             "env": {
                 "GIN_MODE": "debug",
-            }
+            },
+            "preLaunchTask": "go-mod-tidy"
         }
     ]
 }

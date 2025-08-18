@@ -19,7 +19,7 @@ var users = []User{
 	},
 }
 
-func registerUserRoutes(r *gin.Engine) {
+func registerUserRoutes(r *gin.RouterGroup) {
 	group := r.Group("v1/users")
 	group.GET("", listUsers)
 	group.POST("", createUser)

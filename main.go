@@ -4,6 +4,7 @@ import (
 	"main/api"
 	"main/config"
 	"main/logging"
+	"main/util"
 
 	"github.com/sirupsen/logrus"
 )
@@ -14,7 +15,12 @@ var cfg *config.Config
 func main() {
 	setup()
 	log.Infof("%s", PrintVersion())
-	log.Debugf("Applicazione avviata con: %s", cfg.Print())
+	for _, line := range cfg.PrintProperties() {
+		log.Debugf("Applicazione configurata con proprietà: %s", line)
+	}
+	for _, line := range util.PrintEnvVars() {
+		log.Debugf("Applicazione configurata con variabili di ambiente: %s", line)
+	}
 	start()
 }
 

@@ -3,6 +3,8 @@ package util
 import (
 	"mime/multipart"
 	"net/http"
+	"os"
+	"sort"
 	"strings"
 )
 
@@ -58,4 +60,10 @@ func ConvertMegabitesToBytes(v int) int {
 
 func ShiftMB(v int) int64 {
 	return int64(v) << 20
+}
+
+func PrintEnvVars() []string {
+	result := os.Environ()
+	sort.Strings(result)
+	return result
 }

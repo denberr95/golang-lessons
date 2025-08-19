@@ -6,21 +6,29 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func configureLogLevel() {
-	switch loggingConfig.Base.Level {
+func configureLogLevel(l *logrus.Logger, level config.LogLevel) {
+	if level.IsValid() {
+		l.SetLevel(convertLogLevel(level))
+	}
+}
+
+func convertLogLevel(level config.LogLevel) logrus.Level {
+	switch level {
 	case config.PANIC:
-		log.SetLevel(logrus.PanicLevel)
+		return logrus.PanicLevel
 	case config.FATAL:
-		log.SetLevel(logrus.FatalLevel)
+		return logrus.FatalLevel
 	case config.ERROR:
-		log.SetLevel(logrus.ErrorLevel)
+		return logrus.ErrorLevel
 	case config.WARN:
-		log.SetLevel(logrus.WarnLevel)
+		return logrus.WarnLevel
 	case config.INFO:
-		log.SetLevel(logrus.InfoLevel)
+		return logrus.InfoLevel
 	case config.DEBUG:
-		log.SetLevel(logrus.DebugLevel)
+		return logrus.DebugLevel
 	case config.TRACE:
-		log.SetLevel(logrus.TraceLevel)
+		return logrus.TraceLevel
+	default:
+		return logrus.ErrorLevel
 	}
 }

@@ -6,9 +6,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func configureFormatter() {
+func configureFormatter(l *logrus.Logger) {
 	if loggingConfig.Text != nil {
-		log.SetFormatter(&logrus.TextFormatter{
+		l.SetFormatter(&logrus.TextFormatter{
 			DisableColors:   loggingConfig.Text.DisableColors,
 			FullTimestamp:   loggingConfig.Text.FullTimestamp,
 			ForceQuote:      loggingConfig.Text.ForceQuote,
@@ -18,7 +18,7 @@ func configureFormatter() {
 	}
 
 	if loggingConfig.JSON != nil {
-		log.SetFormatter(&logrus.JSONFormatter{
+		l.SetFormatter(&logrus.JSONFormatter{
 			DisableTimestamp:  loggingConfig.JSON.DisableTimestamp,
 			DisableHTMLEscape: loggingConfig.JSON.DisableHTMLEscape,
 			PrettyPrint:       loggingConfig.JSON.PrettyPrint,

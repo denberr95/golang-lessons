@@ -36,14 +36,14 @@ type WebServerLogConfig struct {
 }
 
 type LoggingConfig struct {
-	Base *LoggingBaseConfig `mapstructure:"base"`
-	Text *LoggingTextConfig `mapstructure:"text"`
-	JSON *LoggingJSONConfig `mapstructure:"json"`
+	Base    *LoggingBaseConfig  `mapstructure:"base"`
+	Loggers map[string]LogLevel `mapstructure:"loggers"`
+	Text    *LoggingTextConfig  `mapstructure:"text"`
+	JSON    *LoggingJSONConfig  `mapstructure:"json"`
 }
 
 type LoggingBaseConfig struct {
-	Level        LogLevel `mapstructure:"level"`
-	ReportCaller bool     `mapstructure:"reportCaller"`
+	ReportCaller bool `mapstructure:"reportCaller"`
 }
 
 type LoggingTextConfig struct {
@@ -125,16 +125,17 @@ func (cfg WebServerHTTPConfig) GetMaxMultipartMemoryMB() int64 {
 
 func (cfg *Config) PrintProperties() []string {
 	result := []string{}
-	result = append(result, propertiesWebServerBaseConfig()...)
-	result = append(result, propertiesWebServerHttpConfig()...)
-	result = append(result, propertiesWebServerLogConfig()...)
-	result = append(result, propertiesLoggingBaseConfig()...)
-	result = append(result, propertiesLoggingTextConfig()...)
-	result = append(result, propertiesLoggingJSONConfig()...)
+	result = append(result, cfg.propertiesWebServerBaseConfig()...)
+	result = append(result, cfg.propertiesWebServerHttpConfig()...)
+	result = append(result, cfg.propertiesWebServerLogConfig()...)
+	result = append(result, cfg.propertiesLoggingBaseConfig()...)
+	result = append(result, cfg.propertiesLoggingLoggers()...)
+	result = append(result, cfg.propertiesLoggingTextConfig()...)
+	result = append(result, cfg.propertiesLoggingJSONConfig()...)
 	return result
 }
 
-func propertiesWebServerBaseConfig() []string {
+func (cfg *Config) propertiesWebServerBaseConfig() []string {
 	return []string{
 		fmt.Sprintf("goapp.webserver.base.host=%s", cfg.GoApp.WebServer.Base.Host),
 		fmt.Sprintf("goapp.webserver.base.port=%d", cfg.GoApp.WebServer.Base.Port),
@@ -143,7 +144,7 @@ func propertiesWebServerBaseConfig() []string {
 	}
 }
 
-func propertiesWebServerHttpConfig() []string {
+func (cfg *Config) propertiesWebServerHttpConfig() []string {
 	return []string{
 		fmt.Sprintf("goapp.webserver.http.readTimeout=%s", cfg.GoApp.WebServer.HTTP.ReadTimeout),
 		fmt.Sprintf("goapp.webserver.http.writeTimeout=%s", cfg.GoApp.WebServer.HTTP.WriteTimeout),
@@ -154,7 +155,7 @@ func propertiesWebServerHttpConfig() []string {
 	}
 }
 
-func propertiesWebServerLogConfig() []string {
+func (cfg *Config) propertiesWebServerLogConfig() []string {
 	return []string{
 		fmt.Sprintf("goapp.webserver.log.enableAccessLog=%t", cfg.GoApp.WebServer.Log.EnableAccessLog),
 		fmt.Sprintf("goapp.webserver.log.enableLogMiddleware=%t", cfg.GoApp.WebServer.Log.EnableLogMiddleware),
@@ -162,14 +163,21 @@ func propertiesWebServerLogConfig() []string {
 	}
 }
 
-func propertiesLoggingBaseConfig() []string {
+func (cfg *Config) propertiesLoggingBaseConfig() []string {
 	return []string{
-		fmt.Sprintf("goapp.logging.base.level=%s", cfg.GoApp.Logging.Base.Level.String()),
 		fmt.Sprintf("goapp.logging.base.reportCaller=%t", cfg.GoApp.Logging.Base.ReportCaller),
 	}
 }
 
-func propertiesLoggingTextConfig() []string {
+func (cfg *Config) propertiesLoggingLoggers() []string {
+	props := []string{}
+	for k, v := range cfg.GoApp.Logging.Loggers {
+		props = append(props, fmt.Sprintf("goapp.logging.loggers.%s=%d", k, v))
+	}
+	return props
+}
+
+func (cfg *Config) propertiesLoggingTextConfig() []string {
 	return []string{
 		fmt.Sprintf("goapp.logging.text.forceQuote=%t", cfg.GoApp.Logging.Text.ForceQuote),
 		fmt.Sprintf("goapp.logging.text.disableColors=%t", cfg.GoApp.Logging.Text.DisableColors),
@@ -177,7 +185,7 @@ func propertiesLoggingTextConfig() []string {
 	}
 }
 
-func propertiesLoggingJSONConfig() []string {
+func (cfg *Config) propertiesLoggingJSONConfig() []string {
 	return []string{
 		fmt.Sprintf("goapp.logging.json.disableTimestamp=%t", cfg.GoApp.Logging.JSON.DisableTimestamp),
 		fmt.Sprintf("goapp.logging.json.disableHTMLEscape=%t", cfg.GoApp.Logging.JSON.DisableHTMLEscape),

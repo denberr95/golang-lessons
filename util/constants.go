@@ -34,3 +34,7 @@ const (
 	HeaderTransferEncoding   = "Transfer-Encoding"
 	HeaderContentDisposition = "Content-Disposition"
 )
+
+const (
+	Root string = "root"
+)

@@ -27,15 +27,18 @@ func registerUserRoutes(r *gin.RouterGroup) {
 }
 
 func createUser(c *gin.Context) {
+	log.Info("Creazione utente")
 	c.Status(http.StatusNoContent)
 }
 
 func listUsers(c *gin.Context) {
+	log.Info("Stampa utenti")
 	c.JSON(http.StatusOK, users)
 }
 
 func getUser(c *gin.Context) {
 	id := c.Param("id")
+	log.Infof("Recupero utente")
 	for _, user := range users {
 		if user.ID == id {
 			c.JSON(http.StatusOK, user)

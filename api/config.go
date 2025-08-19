@@ -14,7 +14,7 @@ import (
 )
 
 var router *gin.Engine
-var log *logrus.Logger = logging.GetLogger()
+var log *logrus.Logger
 var webServerConfig *config.WebServerConfig = &config.GetConfig().GoApp.WebServer
 
 func GetRouter() *gin.Engine {
@@ -22,6 +22,7 @@ func GetRouter() *gin.Engine {
 }
 
 func Run() {
+	log = logging.GetNamedLogger("api")
 	router = gin.New()
 	router.MaxMultipartMemory = webServerConfig.HTTP.GetMaxHeaderSizeMB()
 	router.Use(gin.Recovery())

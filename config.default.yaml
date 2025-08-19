@@ -20,8 +20,11 @@ goapp:
       enablePrintExposedRouter: true
   logging:
     base:
-      level: 6
       reportCaller: false
+    
+    loggers:
+      root: 6
+      api: 1
     
     text:
       forceQuote: true

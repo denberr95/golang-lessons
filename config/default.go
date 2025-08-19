@@ -27,7 +27,7 @@ func validateWebServerConfig(cfg *WebServerConfig) {
 
 func validateLoggingConfig(cfg *LoggingConfig) {
 	validateLogFormat(cfg)
-	validateLogLevel(&cfg.Base.Level)
+	validateLogLevel(cfg.Loggers)
 }
 
 func validateLogFormat(cfg *LoggingConfig) {
@@ -40,9 +40,11 @@ func validateLogFormat(cfg *LoggingConfig) {
 	}
 }
 
-func validateLogLevel(level *LogLevel) {
-	if !level.IsValid() {
-		*level = ERROR
+func validateLogLevel(loggers map[string]LogLevel) {
+	for name, lvl := range loggers {
+		if !lvl.IsValid() {
+			loggers[name] = ERROR
+		}
 	}
 }
 
@@ -62,7 +64,7 @@ func validateHost(cfg *WebServerConfig) {
 			cfg.Base.Host = hostname
 		}
 	case cfg.Base.Host != "":
-		// Host is explicitly set, no action needed
+		// Host già specificato non sono necessarie azioni
 	default:
 		cfg.Base.Host = util.Localhost
 	}
